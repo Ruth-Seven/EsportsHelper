@@ -1,6 +1,7 @@
 chromedriver
 
 config.yaml
+nohup.out
 
 # macOS 
 .DS_Store
