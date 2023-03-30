@@ -17,8 +17,7 @@ class VersionManager:
                     return str(latestTagJson["tag_name"][1:])
                 return "0.0.0"
         except Exception as e:
-            print("[red]从github获取最新版信息失败!")
-            print_exc()
+            log.error("从github获取最新版信息失败!")
             return "0.0.0"
 
     @staticmethod
@@ -34,6 +33,5 @@ class VersionManager:
     @staticmethod
     def checkVersion():
         if not VersionManager.isLatestVersion(VersionManager.getVersion()):
-            log.warning("\n==!!! 新版本可用 !!!==\n ==请从此处下载: ==")
-            print("[yellow]\n==!!! 新版本可用 !!!==\n ==请从此处下载: https://github.com/Yudaotor/EsportsHelper/releases/latest ==[/yellow]")
-    
+            log.warning("\n==!!! 新版本可用 !!!==\n ==请从此处下载: https://github.com/Yudaotor/EsportsHelper/releases/latest==" )
+          

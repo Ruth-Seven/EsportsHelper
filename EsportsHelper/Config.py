@@ -1,5 +1,4 @@
 from pathlib import Path
-from traceback import format_exc, print_exc
 
 import yaml
 from rich import print
@@ -22,24 +21,21 @@ class Config:
                 self.connectorDropsUrl = config.get("connectorDropsUrl", "")
                 self.platForm = config.get("platForm", "windows")
                 self.debug = config.get("debug", False)
+                self.proxy = config.get("proxy", "127.0.0.1:7890")
                 self.format()
 
         except FileNotFoundError as ex:
             log.error("配置文件找不到")
-            print("[red]配置文件找不到")
         except (ParserError, KeyError) as ex:
             log.error("配置文件格式错误")
-            print("[red]配置文件格式错误")
-        except Exception as ex:
-            print_exc()
-            self.log.error(format_exc())
+        except Exception as e:
+            self.log.error(f"配置错误 {e}")
 
     def format(self):
         while "" in self.disWatchMatches:
             self.disWatchMatches.remove("")
         if self.username == "NoUsername" or self.password == "NoPassword":
             self.log.error("配置文件中没有账号密码信息")
-            print("[red]配置文件中没有账号密码信息")
         if isinstance(self.headless, str):
             if self.headless == "True" or self.headless == "true":
                 self.headless = True

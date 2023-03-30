@@ -1,7 +1,10 @@
 #!/bin/zsh
 DIR=$(readlink -f $(dirname $0))
 LOG=$DIR/logs/scripts
-mkdir -p $LOG
+PIC=$DIR/logs/pics
+mkdir -p $LOG 
+mkdir -p $PIC
+
 log_file=$LOG/$(date +%m%d-%H%M).log
 touch $log_file
 
@@ -21,4 +24,5 @@ echo "模拟操作，随机睡眠 $(($sleep_time / 60))分钟" | tee -a $log_fil
 sleep $sleep_time
 echo "Starting the program\n" | tee -a $log_file
 ps aux | grep -v "grep" | grep "python -u /Users/ove/Development/python/lol-epsort/EsportsHelper/main.py" | awk '{print $2}' | xargs -I {}  kill -9 {}
+ps aux | grep -v "grep" | grep "undetected_chromedriver"  | awk '{print $2}' |  xargs -I {} kill -9 {}
 python -u "/Users/ove/Development/python/lol-epsort/EsportsHelper/main.py" | tee -a $log_file  

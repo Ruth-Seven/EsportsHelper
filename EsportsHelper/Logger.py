@@ -23,16 +23,8 @@ class Logger:
         logging.basicConfig(
             format="%(asctime)s %(levelname)s: %(message)s",
             level=level,
-            handlers=[fileHandler],
+            handlers=[fileHandler, logging.StreamHandler()],
         )
-        log = logging.getLogger("EsportsHelper")
-        log.info("-------------------------------------------------")
-        log.info("----------- Program started   ---------------")
-        log.info("----------- 本项目开源于github   ---------------")
-        log.info(r"----- 地址: https://github.com/Yudaotor/EsportsHelper -------")
-        log.info(r"----------- 可以点一个小星星吗(*^_^*) ---------------")
-        log.info("-------------------------------------------------")
-        return log
-
+        return logging.getLogger("EsportsHelper")
 
 log = Logger().createLogger()

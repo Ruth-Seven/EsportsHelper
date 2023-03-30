@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
-from EsportsHelper.util import DebugScreen, KnockNotify
+from EsportsHelper.util import DebugScreen, KnockNotify, FalseRetries
 
 
 class Rewards:
@@ -23,59 +23,55 @@ class Rewards:
             wait.until(ec.presence_of_element_located(
                 (By.CSS_SELECTOR, "div[class=status-summary] g")))
         except TimeoutException:
+            DebugScreen(self.driver, "isRewardMarkExist", self.config.debug)
             return False
         return True
 
-    def checkRewards(self, url, retryTimes=6) -> bool:
+    
+    def checkRewards(self, url) -> bool:
         splitUrl = url.split('/')
+        match = ""
         if splitUrl[-2] != "live":
             match = splitUrl[-2]
         else:
             match = splitUrl[-1]
-        for i in range(retryTimes):
+
+        @FalseRetries(5, f"{match} 不在可奖励状态")
+        def inner_check():
             if self.isRewardMarkExist():
                 self.log.info(f"√√√√√ {match} 正常观看 可获取奖励 √√√√√ ")
-                print(f"[green]√√√√√[/green] {match} 正常观看 可获取奖励 [green]√√√√√ ")
                 return True
             else:
-                if i != retryTimes - 1:
-                    self.log.warning(f"××××× {match} 观看异常 ××××× 重试中...")
-                    print(
-                        f"[yellow]×××××[/yellow] {match} 观看异常 [yellow]××××× 重试中...")
-                    self.driver.refresh()
-                else:
-                    self.log.error(f"××××× {match} 观看异常 ××××× url={url}")
-                    print(f"[red]×××××[/red] {match} 观看异常 [red]××××× url={url}")
-                    return False
+                DebugScreen(self.driver, "checkRewardsfail", self.config.debug)
+                return False
+        return inner_check()
 
     def checkNewDrops(self):
         try:
-            self.driver.implicitly_wait(15)
-            time.sleep(10)
-            DebugScreen(self.driver, "checkNewDrops", self.config.debug)
-
             isDrop = False
             imgUrl = []
             title = []
-            imgEl = self.driver.find_elements(by=By.CSS_SELECTOR, value="img[class=img]")
+            imgEl = self.driver.find_elements(
+                by=By.CSS_SELECTOR, value="img[class=img]")
             if len(imgEl) > 0:
                 for img in imgEl:
                     imgUrl.append(img.get_attribute("src"))
                 isDrop = True
-            titleEl = self.driver.find_elements(by=By.CSS_SELECTOR, value="div[class=title]")
+            titleEl = self.driver.find_elements(
+                by=By.CSS_SELECTOR, value="div[class=title]")
             if len(titleEl) > 0:
                 for tit in titleEl:
                     title.append(tit.text)
                 isDrop = True
             self.driver.implicitly_wait(15)
             if isDrop:
+                DebugScreen(self.driver, "checkNewDrops-Yes",
+                            self.config.debug)
                 return isDrop, imgUrl, title
             else:
                 return isDrop, [], []
         except Exception:
             self.log.error("〒.〒 检查掉落失败")
-            traceback.print_exc()
-            print("[red]〒.〒 检查掉落失败[/red]")
             return False, [], []
 
     def SystemNotify(self,  imgUrl, title):
@@ -84,7 +80,7 @@ class Rewards:
             KnockNotify(drop_msg)
 
     def notifyDrops(self, imgUrl, title):
-        SystemNotify(imgUrl, title)
+        self.SystemNotify(imgUrl, title)
         try:
             for i in range(len(imgUrl)):
                 if "https://oapi.dingtalk.com" in self.config.connectorDropsUrl:
@@ -98,7 +94,6 @@ class Rewards:
                         }
                     }
                     requests.post(self.config.connectorDropsUrl, json=data)
-                    time.sleep(5)
                 elif "https://discord.com/api/webhooks" in self.config.connectorDropsUrl:
                     embed = {
                         "title": "掉落提醒",
@@ -113,15 +108,11 @@ class Rewards:
                     }
                     requests.post(self.config.connectorDropsUrl, headers={
                                   "Content-type": "application/json"}, json=params)
-                    time.sleep(5)
                 elif "https://fwalert.com" in self.config.connectorDropsUrl:
                     params = {
                         "text": f"[{self.config.username}]{title[i]}"
                     }
                     requests.post(self.config.connectorDropsUrl, headers={
                                   "Content-type": "application/json"}, json=params)
-                    time.sleep(5)
         except Exception:
             self.log.error("〒.〒 掉落提醒失败")
-            traceback.print_exc()
-            print("[red]〒.〒 掉落提醒失败[/red]")
