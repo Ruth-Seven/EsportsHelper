@@ -6,3 +6,5 @@ undetected_chromedriver==3.4.6
 urllib3==1.26.15
 webdriver_manager==3.8.5
 pyinstaller==5.9.0
+cssselect==1.2.0
+lxml=4.9.2

@@ -6,17 +6,17 @@ from time import sleep
 from traceback import format_exc
 
 import requests
+from lxml.html import fromstring
 from rich import print
 from selenium.common import WebDriverException
 from selenium.webdriver.common.by import By
-from urllib3.exceptions import MaxRetryError
-
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
+from selenium.webdriver.support.ui import WebDriverWait
+from urllib3.exceptions import MaxRetryError
 
 from EsportsHelper.Rewards import Rewards
 from EsportsHelper.Twitch import Twitch
-from EsportsHelper.util import DebugScreen, KnockNotify, Quit, FalseRetries
+from EsportsHelper.util import DebugScreen, FalseRetries, KnockNotify, Quit
 from EsportsHelper.Youtube import Youtube
 
 
@@ -42,7 +42,7 @@ class Match:
             try:
                 self.log.info("●_● 开始检查直播...")
                 self.driver.switch_to.window(self.mainWindow)
-                
+
                 isDrop, imgUrl, title = self.rewards.checkNewDrops()
                 if isDrop:
                     for tit in title:
@@ -56,6 +56,7 @@ class Match:
                 except Exception as e:
                     self.driver.get("https://lolesports.com/schedule")
                 liveMatches = self.getMatchInfo()
+                self.showNextGame()
                 if len(liveMatches) == 0:
                     self.log.info("〒.〒 没有赛区正在直播")
                 else:
@@ -90,14 +91,33 @@ class Match:
         try:
             matches = []
             wait = WebDriverWait(self.driver, 5)
+            try:
+                wait.until(ec.presence_of_element_located((By.CSS_SELECTOR, ".EventDate")))
+                self.log.info("连接时间线成功")
+            except TimeoutError:
+                self.log.error("网络不稳定，请检查网络")
+                return []
             elements = wait.until(ec.presence_of_all_elements_located(
                 (By.CSS_SELECTOR, ".EventMatch .live.event")))
             for element in elements:
                 matches.append(element.get_attribute("href"))
             return matches
         except Exception as e:
-            self.log.error(f"Q_Q 不存在或者获取比赛列表失败: {e}")
+            self.log.error(f"Q_Q 获取直播比赛信息失败: {e}")
             return []
+
+    def showNextGame(self):
+        try: 
+            elm = self.driver.find_element(By.CSS_SELECTOR, "div.divider.future~div.EventDate~div.EventMatch")
+            tree = fromstring(elm.get_attribute("innerHTML"))
+            hour = tree.cssselect(".hour")[0].text_content()
+            ampm = tree.cssselect(".ampm")[0].text_content()
+            team1 = tree.cssselect("div.team-info > h2 > span.name")[0].text_content()
+            team2 = tree.cssselect("div.team-info h2 >  span.name")[1].text_content()
+            league = tree.cssselect("div.league > div.name")[0].text_content()
+            self.log.info(f"下一场比赛:  {team1} vs {team2}  在 {league} 赛区 {hour}{ampm} 举行")
+        except Exception as e:
+            self.log.error(f"获取下一场比赛信息失败 {e}")
 
     def closeFinishedTabs(self, liveMatches):
         try:
