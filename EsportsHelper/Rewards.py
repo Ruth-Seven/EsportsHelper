@@ -74,9 +74,10 @@ class Rewards:
             return False, [], []
 
     def SystemNotify(self,  imgUrl, title):
-        for index, item in enumerate(zip(imgUrl, title)):
-            drop_msg = "有新的掉落啦，\n{item[0]}\n{item[1]}\n可检查: https://lolesports.com/rewards"
-            KnockNotify(drop_msg)
+        if self.config.systemNotify:
+            for index, item in enumerate(zip(imgUrl, title)):
+                drop_msg = "有新的掉落啦，\n{item[0]}\n{item[1]}\n可检查: https://lolesports.com/rewards"
+                KnockNotify(drop_msg)
 
     def notifyDrops(self, imgUrl, title):
         self.SystemNotify(imgUrl, title)

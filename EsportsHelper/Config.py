@@ -24,6 +24,7 @@ class Config:
                 global globalDebug
                 globalDebug = self.debug
                 self.proxy = config.get("proxy", "127.0.0.1:7890")
+                self.systemNotify = config.get("systemNotify", False)
                 self.format()
 
         except FileNotFoundError as ex:

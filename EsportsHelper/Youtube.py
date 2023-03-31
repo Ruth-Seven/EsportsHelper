@@ -16,8 +16,10 @@ class Youtube:
 
     def setYoutubeQuality(self) -> bool:
         try:
+            WebDriverWait(self.driver, 30).until(ec.presence_of_element_located((By.CSS_SELECTOR, "button.ytp-play-button.ytp-button")))
             play_button = self.driver.find_element(By.CSS_SELECTOR, "button.ytp-play-button.ytp-button")
-            play_button.click()
+            if play_button.get_attribute("data-title-no-tooltip") == "Pause":
+                play_button.click()
 
             settingsButton = self.driver.find_element(By.CSS_SELECTOR, "button[data-tooltip-target-id=ytp-settings-button]")
             self.driver.execute_script("arguments[0].click();", settingsButton)
@@ -31,10 +33,10 @@ class Youtube:
         
         except TimeoutException as e:
             DebugScreen(self.driver, "setYoutubeQuality")    
-            self.log.critical(f"°D° Youtube 清晰度设置失败: {e}")
+            self.log.error(f"°D° Youtube 清晰度设置失败: {e}")
             return False
         
         except Exception as e:
             DebugScreen(self.driver, "setYoutubeQuality")    
-            self.log.critical(f"°D° Youtube 清晰度设置失败: {e}")
+            self.log.error(f"°D° Youtube 清晰度设置失败: {e}")
             return False
