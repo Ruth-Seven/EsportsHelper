@@ -26,27 +26,31 @@ def info():
 
 
 def KnockNotify(msg):
-    if Config.config.systemNotify:
-        subprocess.run(f"source ~/.personalrc; knock {msg}", shell=True)
-
+    try:
+        if Config.config.systemNotify:
+            subprocess.run(f"source ~/.personalrc; knock {msg}", shell=True)
+    except:
+        pass
 
 def Quit(driver=None, e=None):
     if e:
         KnockNotify(f"🥵停止挂机: '{e}'")
         log.error(e)
+    log.error(f"trace : \n{traceback.print_exc()}")
     log.info("------程序退出------")
 
-    log.error(traceback.print_exc())
     try:
+        log.info("------关闭Chrome Driver------")
         driver.quit()
-    except NameError:
-        log.info("driver was not defined")
+    except: 
+        pass
+    quit()
 
 
 def DebugScreen(driver, lint=""):
     if Config.config.debug:
         png = f"./logs/pics/{time.strftime('%b-%d-%H-%M-%S')}-{lint}.png"
-        log.info(f"DebugScreen: {png}")
+        log.debug(f"DebugScreen: {png}")
         driver.save_screenshot(png)
 
 
@@ -81,6 +85,7 @@ def FalseRetries(times=3, msg=""):
                     return True
                 else:
                     log.warn(msg + ", 重试中")
+            log.error(msg + ", 重试失败") 
             return False
         return Wrap
     return inner

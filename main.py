@@ -65,7 +65,10 @@ def main():
 if __name__ == '__main__':
     try:
         main()
-    except (KeyboardInterrupt, SystemExit, InterruptedError):
+    except (KeyboardInterrupt, InterruptedError):
         Quit(driver, "程序被打断")
+    except SystemExit:
+        pass
     except Exception as e:
         Quit(driver, e)
+    

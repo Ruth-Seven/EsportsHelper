@@ -9,6 +9,7 @@ from selenium.webdriver.common.keys import Keys
 
 from EsportsHelper.util import DebugScreen
 
+
 class Youtube:
     def __init__(self, driver, log) -> None:
         self.driver = driver
@@ -16,37 +17,47 @@ class Youtube:
 
     def checkYoutube(self) -> bool:
         try:
-            self.driver.find_element(By.CSS_SELECTOR, "iframe[id=video-player-youtube]")
+            WebDriverWait(self.driver, 30).until(ec.presence_of_element_located((
+                By.CLASS_NAME, "iframe[id=video-player-youtube]")))
             return True
         except:
             return False
 
     def setYoutubeQuality(self) -> bool:
         try:
-            self.driver.switch_to.frame(0)
-            WebDriverWait(self.driver, 30).until(ec.presence_of_element_located((By.CSS_SELECTOR, "button.ytp-play-button.ytp-button"))) 
-            play_button = self.driver.find_element(By.CSS_SELECTOR, "button.ytp-play-button.ytp-button")
+            WebDriverWait(self.driver, 30).until(ec.frame_to_be_available_and_switch_to_it((
+                By.CLASS_NAME, "iframe[id=video-player-youtube]")))
+
+            # 开始播放
+            play_button = WebDriverWait(self.driver, 30).until(
+                ec.element_to_be_clickable((By.CSS_SELECTOR, "button.osano-cm-accept-all")))
             if play_button.get_attribute("data-title-no-tooltip") == "Play":
                 play_button.click()
-            self.driver.switch_to.default_content()
 
-            settingsButton = self.driver.find_element(By.CSS_SELECTOR, "button[data-tooltip-target-id=ytp-settings-button]")
-            self.driver.execute_script("arguments[0].click();", settingsButton)
-            qualityButton = self.driver.find_element(By.XPATH, "/html/body/div[1]/div/div[25]/div/div/div[2]/div[3]")
-            self.driver.execute_script("arguments[0].click();", qualityButton)
-            option = self.driver.find_element(By.XPATH, "/html/body/div[1]/div/div[25]/div/div[2]/div[6]/div")
-            self.driver.execute_script("arguments[0].click();", option)
+            # setting_button
+            self.driver.find_element(
+                By.CSS_SELECTOR, "button.ytp-settings-button").click()
+            # quality div
+            time.sleep(1)  # wait for animation
+            WebDriverWait(self.driver, 5).until(ec.element_to_be_clickable(
+                (By.XPATH, "//div[contains(text(),'Quality')]"))).click()
+            # 140p div
+            time.sleep(1)
+            WebDriverWait(self.driver, 5).until(ec.element_to_be_clickable(
+                (By.XPATH, "//span[contains(string(),'144p')]"))).click()
 
             self.driver.switch_to.default_content()
             self.log.info(">_< Youtube 144p清晰度设置成功")
             return True
-        
+
         except TimeoutException as e:
-            DebugScreen(self.driver, "setYoutubeQuality")    
-            self.log.error(f"°D° Youtube 清晰度设置失败: 超时{e}")
+            DebugScreen(self.driver, "setYoutubeQuality")
+            self.driver.switch_to.default_content()
+            self.log.error(f"°D° Youtube 清晰度设置失败: 网络超时{e}")
             return False
-        
+
         except Exception as e:
-            DebugScreen(self.driver, "setYoutubeQuality")    
+            DebugScreen(self.driver, "setYoutubeQuality")
+            self.driver.switch_to.default_content()
             self.log.error(f"°D° Youtube 清晰度设置失败: {e}")
             return False

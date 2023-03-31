@@ -17,18 +17,22 @@ class Rewards:
         self.driver = driver
         self.config = config
 
-    def isRewardMarkExist(self):
-        wait = WebDriverWait(self.driver, 25)
+    def _isRewardMarkExist(self):
         try:
-            wait.until(ec.presence_of_element_located(
-                (By.CSS_SELECTOR, "div[class=status-summary] g")))
+            box = WebDriverWait(self.driver, 20).until(ec.presence_of_element_located((By.CSS_SELECTOR,"div.status-items div.message")))
+            if "enjoy the show!" in box.get_attribute("innerHTML"):
+                return True
+            self.log.debug(f"Reward info: {box.get_attribute('innerHTML')}")
+            return False
         except TimeoutException:
             DebugScreen(self.driver, "isRewardMarkExist")
             return False
-        return True
+        except Exception as e:
+            DebugScreen(self.driver, "isRewardMarkExist")
+            self.log.error(f"无法检查是否可获取奖励: {e}")
+            return False
 
-    
-    def checkRewards(self, url) -> bool:
+    def checkRewardable(self, url) -> bool:
         splitUrl = url.split('/')
         match = ""
         if splitUrl[-2] != "live":
@@ -36,10 +40,10 @@ class Rewards:
         else:
             match = splitUrl[-1]
 
-        @FalseRetries(5, f"{match} 不在可奖励状态")
+        @FalseRetries(2, f"{match} 不能获取奖励")
         def inner_check():
-            if self.isRewardMarkExist():
-                self.log.info(f"√√√√√ {match} 正常观看 可获取奖励 √√√√√ ")
+            if self._isRewardMarkExist():
+                self.log.critical(f"√√√√√ {match} 正常观看 可获取奖励 √√√√√ ")
                 return True
             else:
                 DebugScreen(self.driver, "checkRewardsfail")
