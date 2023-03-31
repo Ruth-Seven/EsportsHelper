@@ -22,11 +22,11 @@ def Watch(config):
         driver = Webdriver(config).createWebdriver(config) 
     except TypeError:
         log.error(format_exc())
-        log.error("눈_눈 生成WEBDRIVER失败!\n无法找到最新版谷歌浏览器!如没有下载或不是最新版请检查好再次尝试\n以上都检查过的话如还不行检查节点或是尝试可以用管理员方式打开\n按任意键退出...")
+        log.error("눈_눈 生成WEBDRIVER失败!\n无法找到最新版谷歌浏览器!如没有下载或不是最新版请检查好再次尝试\n以上都检查过的话如还不行检查节点或是尝试可以用管理员方式打开\n")
         Quit(driver, e)
     except Exception as e:
         log.error(format_exc())
-        log.error("눈_눈 生成WEBDRIVER失败!\n是否有谷歌浏览器?\n是不是网络问题?请检查VPN节点是否可用\n按任意键退出...")
+        log.error("눈_눈 生成WEBDRIVER失败!\n是否有谷歌浏览器?\n是不是网络问题?请检查VPN节点是否可用\n")
         Quit(driver, e)
     loginHandler = LoginHandler(log=log, driver=driver)
     try:

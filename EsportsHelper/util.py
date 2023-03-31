@@ -54,7 +54,7 @@ def TimeOutRetries(times=3, msg="Error", hint=""):
         @functools.wraps(func)
         def Warp(*args, **vargs):
             retries = times
-            while retries >= 0:
+            while retries > 0:
                 retries = retries - 1
                 try:
                     return func(*args, **vargs)
@@ -74,7 +74,7 @@ def FalseRetries(times=3, msg=""):
         @functools.wraps(func)
         def Wrap(*args, **vargs):
             retries = times
-            while retries >= 0:
+            while retries > 0:
                 retries = retries - 1
                 if func(*args, **vargs):
                     return True

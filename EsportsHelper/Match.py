@@ -16,7 +16,7 @@ from selenium.webdriver.support import expected_conditions as ec
 
 from EsportsHelper.Rewards import Rewards
 from EsportsHelper.Twitch import Twitch
-from EsportsHelper.util import DebugScreen, KnockNotify, Quit, TimeOutRetries
+from EsportsHelper.util import DebugScreen, KnockNotify, Quit, FalseRetries
 from EsportsHelper.Youtube import Youtube
 
 
@@ -30,31 +30,7 @@ class Match:
         self.youtube = Youtube(driver=driver, log=log)
         self.currentWindows = {}
         self.mainWindow = self.driver.current_window_handle
-        self.OVERRIDES = {}
-        self.retryTimes = 3
-        try:
-            req = requests.session()
-            headers = {'Content-Type': 'text/plain; charset=utf-8',
-                       'Connection': 'close'}
-            remoteOverrideFile = req.get(
-                "https://raw.githubusercontent.com/Yudaotor/EsportsHelper/main/override.txt", headers=headers)
-            if remoteOverrideFile.status_code == 200:
-                override = remoteOverrideFile.text.split(",")
-                first = True
-                for o in override:
-                    temp = o.split("|")
-                    if len(temp) == 2:
-                        if first:
-                            first = False
-                        else:
-                            temp[0] = temp[0][1:]
-                        self.OVERRIDES[temp[0]] = temp[1]
-        except MaxRetryError:
-            self.log.error("获取文件失败, 请稍等再试")
-            input("按任意键退出")
-        except Exception as ex:
-            input("按任意键退出")
-
+      
     def watchMatches(self, delay, max_run_hours):
         self.currentWindows = {}
         self.mainWindow = self.driver.current_window_handle
@@ -120,7 +96,7 @@ class Match:
                 matches.append(element.get_attribute("href"))
             return matches
         except Exception as e:
-            self.log.error(f"Q_Q 获取比赛列表失败. {e}")
+            self.log.error(f"Q_Q 不存在或者获取比赛列表失败: {e}")
             return []
 
     def closeFinishedTabs(self, liveMatches):
@@ -146,12 +122,16 @@ class Match:
         except Exception as e:
             self.log.error(f"关闭窗口出错: {e}")
 
-    @TimeOutRetries(3)
+    @FalseRetries(3, "cookies接受失败")
     def acceptCookies(self):
-        button = self.driver.find_element(By.CSS_SELECTOR, "button.osano-cm-accept-all")
-        button.click()
-        self.log.info("接受cookies")
-        
+        try:
+            button = self.driver.find_element(By.CSS_SELECTOR, "button.osano-cm-accept-all")
+            button.click()
+            self.log.info("接受cookies")
+            return True
+        except:
+            return False
+
     def startWatchNewMatches(self, liveMatches, disWatchMatches):
         newLiveMatches = set(liveMatches) - set(self.currentWindows.keys())
         for match in newLiveMatches:
