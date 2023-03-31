@@ -23,7 +23,7 @@ class Youtube:
 
     def setYoutubeQuality(self) -> bool:
         try:
-            self.driver.switch_to().frame(0)
+            self.driver.switch_to.frame(0)
             WebDriverWait(self.driver, 30).until(ec.presence_of_element_located((By.CSS_SELECTOR, "button.ytp-play-button.ytp-button"))) 
             play_button = self.driver.find_element(By.CSS_SELECTOR, "button.ytp-play-button.ytp-button")
             if play_button.get_attribute("data-title-no-tooltip") == "Play":
