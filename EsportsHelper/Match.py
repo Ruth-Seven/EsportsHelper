@@ -16,7 +16,7 @@ from selenium.webdriver.support import expected_conditions as ec
 
 from EsportsHelper.Rewards import Rewards
 from EsportsHelper.Twitch import Twitch
-from EsportsHelper.util import DebugScreen, KnockNotify, Quit
+from EsportsHelper.util import DebugScreen, KnockNotify, Quit, TimeOutRetries
 from EsportsHelper.Youtube import Youtube
 
 
@@ -61,6 +61,7 @@ class Match:
         max_run_second = max_run_hours * 3600
         start_time_point = time.time()
 
+        self.acceptCookies()
         while max_run_hours < 0 or time.time() < start_time_point + max_run_second:
             try:
                 self.log.info("●_● 开始检查直播...")
@@ -145,6 +146,12 @@ class Match:
         except Exception as e:
             self.log.error(f"关闭窗口出错: {e}")
 
+    @TimeOutRetries(3)
+    def acceptCookies(self):
+        button = self.driver.find_element(By.CSS_SELECTOR, "button.osano-cm-accept-all")
+        button.click()
+        self.log.info("接受cookies")
+        
     def startWatchNewMatches(self, liveMatches, disWatchMatches):
         newLiveMatches = set(liveMatches) - set(self.currentWindows.keys())
         for match in newLiveMatches:
@@ -164,15 +171,17 @@ class Match:
                 continue
             self.driver.switch_to.new_window('tab')
             self.currentWindows[match] = self.driver.current_window_handle
-            self.log.info(f"正在载入赛区live")
+            self.log.info(f"●_●正在载入直播")
 
 
             url = match
             self.driver.get(url)
-            if not self.youtube.CheckYoutube():
+            if self.twitch.checkTwitch():
                 self.twitch.setTwitchQuality()
                 self.rewards.checkRewards(url)
-            else:
+            elif self.Youtube.checkYoutube():
                 self.youtube.setYoutubeQuality()
                 self.rewards.checkRewards(url)
+            else:
+                self.log.error(f"不支持的视频流, 请联系owner with: {url}")
 

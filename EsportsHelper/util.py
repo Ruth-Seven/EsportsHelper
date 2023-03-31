@@ -1,15 +1,16 @@
 import subprocess
-import sys
 import time
 import traceback
 import functools
 
 from selenium.common.exceptions import TimeoutException
 
+
+# from EsportsHelper.Config import 
+from EsportsHelper import Config
 from EsportsHelper.Logger import log
 from EsportsHelper.VersionManager import VersionManager
 
-globalDebug = True
 
 def info():
     log.info("=========================================================")
@@ -39,15 +40,13 @@ def Quit(driver=None, e=None):
         driver.quit()
     except NameError:
         log.info("driver was not defined")
-    
-    sys.exit()
 
 
 def DebugScreen(driver, lint=""):
-    global globalDebug
-    if globalDebug:
-        driver.save_screenshot(
-            f"./logs/pics/{time.strftime('%b-%d-%H-%M-%S')}-{lint}.png")
+    if Config.config.debug:
+        png = f"./logs/pics/{time.strftime('%b-%d-%H-%M-%S')}-{lint}.png"
+        log.info(f"DebugScreen: {png}")
+        driver.save_screenshot(png)
 
 
 def TimeOutRetries(times=3, msg="Error", hint=""):

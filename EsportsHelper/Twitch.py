@@ -12,6 +12,13 @@ class Twitch:
         self.driver = driver
         self.log = log
 
+    def checkTwitch(self) -> bool:
+        try:
+            self.driver.find_element(By.CSS_SELECTOR, "iframe[title=Twitch]")
+            return True
+        except:
+            return False
+
     def setTwitchQuality(self) -> bool:
         try:
             wait = WebDriverWait(self.driver, 30)

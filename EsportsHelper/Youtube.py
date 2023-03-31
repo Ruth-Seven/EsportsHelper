@@ -14,18 +14,19 @@ class Youtube:
         self.driver = driver
         self.log = log
 
-    def CheckYoutube(self) -> bool:
+    def checkYoutube(self) -> bool:
         try:
-            WebDriverWait(self.driver, 30).until(ec.presence_of_element_located((By.CSS_SELECTOR, "button.ytp-play-button.ytp-button")))
+            self.driver.find_element(By.CSS_SELECTOR, "iframe[id=video-player-youtube]")
             return True
         except:
             return False
-        
+
     def setYoutubeQuality(self) -> bool:
         try:
-            WebDriverWait(self.driver, 30).until(ec.presence_of_element_located((By.CSS_SELECTOR, "button.ytp-play-button.ytp-button")))
+            self.driver.switch_to().frame(0)
+            WebDriverWait(self.driver, 30).until(ec.presence_of_element_located((By.CSS_SELECTOR, "button.ytp-play-button.ytp-button"))) 
             play_button = self.driver.find_element(By.CSS_SELECTOR, "button.ytp-play-button.ytp-button")
-            if play_button.get_attribute("data-title-no-tooltip") == "Pause":
+            if play_button.get_attribute("data-title-no-tooltip") == "Play":
                 play_button.click()
 
             settingsButton = self.driver.find_element(By.CSS_SELECTOR, "button[data-tooltip-target-id=ytp-settings-button]")
@@ -34,13 +35,14 @@ class Youtube:
             self.driver.execute_script("arguments[0].click();", qualityButton)
             option = self.driver.find_element(By.XPATH, "/html/body/div[1]/div/div[25]/div/div[2]/div[6]/div")
             self.driver.execute_script("arguments[0].click();", option)
+
             self.driver.switch_to.default_content()
             self.log.info(">_< Youtube 144p清晰度设置成功")
             return True
         
         except TimeoutException as e:
             DebugScreen(self.driver, "setYoutubeQuality")    
-            self.log.error(f"°D° Youtube 清晰度设置失败: {e}")
+            self.log.error(f"°D° Youtube 清晰度设置失败: 超时{e}")
             return False
         
         except Exception as e:

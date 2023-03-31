@@ -3,9 +3,8 @@ from pathlib import Path
 import yaml
 from rich import print
 from yaml.parser import ParserError
-from EsportsHelper.util import globalDebug
 
-class Config:
+class Configuration:
     def __init__(self, log, configPath: str) -> None:
         self.log = log
         try:
@@ -21,8 +20,6 @@ class Config:
                 self.connectorDropsUrl = config.get("connectorDropsUrl", "")
                 self.platForm = config.get("platForm", "windows")
                 self.debug = config.get("debug", False)
-                global globalDebug
-                globalDebug = self.debug
                 self.proxy = config.get("proxy", "127.0.0.1:7890")
                 self.systemNotify = config.get("systemNotify", False)
                 self.format()
@@ -59,3 +56,7 @@ class Config:
         configPath = Path(configPath)
         if configPath.exists():
             return configPath
+
+
+# global config 
+config = ""

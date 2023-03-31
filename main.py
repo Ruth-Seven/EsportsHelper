@@ -1,9 +1,4 @@
 import argparse
-from time import sleep
-
-
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
 from traceback import format_exc
 from selenium.webdriver.common.by import By
 
@@ -12,7 +7,8 @@ from rich import print
 from EsportsHelper.LoginHandler import LoginHandler
 from EsportsHelper.Webdriver import Webdriver
 from EsportsHelper.Logger import log
-from EsportsHelper.Config import Config
+from EsportsHelper import Config
+from EsportsHelper.Config import Configuration
 from EsportsHelper.Match import Match
 from EsportsHelper.util import KnockNotify, info, Quit
 
@@ -58,7 +54,7 @@ def main():
                         help='config file path')
     args = parser.parse_args()
 
-    config = Config(log, args.configPath)
+    config = Config.config = Configuration(log, args.configPath)
 
     KnockNotify("🫡尝试挂机")
     Watch(config)
