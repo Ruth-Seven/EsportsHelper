@@ -23,7 +23,7 @@ class Rewards:
             wait.until(ec.presence_of_element_located(
                 (By.CSS_SELECTOR, "div[class=status-summary] g")))
         except TimeoutException:
-            DebugScreen(self.driver, "isRewardMarkExist", self.config.debug)
+            DebugScreen(self.driver, "isRewardMarkExist")
             return False
         return True
 
@@ -42,7 +42,7 @@ class Rewards:
                 self.log.info(f"√√√√√ {match} 正常观看 可获取奖励 √√√√√ ")
                 return True
             else:
-                DebugScreen(self.driver, "checkRewardsfail", self.config.debug)
+                DebugScreen(self.driver, "checkRewardsfail")
                 return False
         return inner_check()
 
@@ -65,8 +65,7 @@ class Rewards:
                 isDrop = True
             self.driver.implicitly_wait(15)
             if isDrop:
-                DebugScreen(self.driver, "checkNewDrops-Yes",
-                            self.config.debug)
+                DebugScreen(self.driver, "checkNewDrops-Yes")
                 return isDrop, imgUrl, title
             else:
                 return isDrop, [], []

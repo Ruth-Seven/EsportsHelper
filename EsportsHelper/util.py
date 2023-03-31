@@ -9,6 +9,7 @@ from selenium.common.exceptions import TimeoutException
 from EsportsHelper.Logger import log
 from EsportsHelper.VersionManager import VersionManager
 
+globalDebug = True
 
 def info():
     log.info("=========================================================")
@@ -42,8 +43,9 @@ def Quit(driver=None, e=None):
     sys.exit()
 
 
-def DebugScreen(driver, lint="checkNewXDrogs", debug=True):
-    if debug:
+def DebugScreen(driver, lint=""):
+    global globalDebug
+    if globalDebug:
         driver.save_screenshot(
             f"./logs/pics/{time.strftime('%b-%d-%H-%M-%S')}-{lint}.png")
 

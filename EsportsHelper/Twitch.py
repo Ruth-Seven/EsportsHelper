@@ -32,6 +32,6 @@ class Twitch:
             self.log.info(">_< Twitch 160p清晰度设置成功")
             return True
         except Exception as e:
-            DebugScreen(self.driver, "setTwitchQuality", self.config.debug)    
+            DebugScreen(self.driver, "setTwitchQuality")    
             self.log.error(f"°D° Twitch 清晰度设置失败: {e}")               
             return False
