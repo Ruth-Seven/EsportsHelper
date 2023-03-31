@@ -26,7 +26,8 @@ def info():
 
 
 def KnockNotify(msg):
-    subprocess.run(f"source ~/.personalrc; knock {msg}", shell=True)
+    if Config.config.systemNotify:
+        subprocess.run(f"source ~/.personalrc; knock {msg}", shell=True)
 
 
 def Quit(driver=None, e=None):

@@ -180,7 +180,7 @@ class Match:
             if self.twitch.checkTwitch():
                 self.twitch.setTwitchQuality()
                 self.rewards.checkRewards(url)
-            elif self.Youtube.checkYoutube():
+            elif self.youtube.checkYoutube():
                 self.youtube.setYoutubeQuality()
                 self.rewards.checkRewards(url)
             else:
