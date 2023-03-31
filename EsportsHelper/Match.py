@@ -166,14 +166,13 @@ class Match:
             self.currentWindows[match] = self.driver.current_window_handle
             self.log.info(f"正在载入赛区live")
 
-            if match in self.OVERRIDES:
-                url = self.OVERRIDES[match]
-                self.driver.get(url)
+
+            url = match
+            self.driver.get(url)
+            if not self.youtube.CheckYoutube():
                 self.twitch.setTwitchQuality()
                 self.rewards.checkRewards(url)
             else:
-                url = match
-                self.driver.get(url)
                 self.youtube.setYoutubeQuality()
                 self.rewards.checkRewards(url)
 

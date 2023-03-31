@@ -14,6 +14,13 @@ class Youtube:
         self.driver = driver
         self.log = log
 
+    def CheckYoutube(self) -> bool:
+        try:
+            WebDriverWait(self.driver, 30).until(ec.presence_of_element_located((By.CSS_SELECTOR, "button.ytp-play-button.ytp-button")))
+            return True
+        except:
+            return False
+        
     def setYoutubeQuality(self) -> bool:
         try:
             WebDriverWait(self.driver, 30).until(ec.presence_of_element_located((By.CSS_SELECTOR, "button.ytp-play-button.ytp-button")))
