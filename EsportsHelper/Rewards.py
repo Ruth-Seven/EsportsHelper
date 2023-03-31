@@ -19,7 +19,7 @@ class Rewards:
 
     def _isRewardMarkExist(self):
         try:
-            box = WebDriverWait(self.driver, 20).until(ec.presence_of_element_located((By.CSS_SELECTOR,"div.status-items div.message")))
+            box = WebDriverWait(self.driver, 30).until(ec.presence_of_element_located((By.CSS_SELECTOR,"div.status-items div.message")))
             if "enjoy the show!" in box.get_attribute("innerHTML"):
                 return True
             self.log.debug(f"Reward info: {box.get_attribute('innerHTML')}")

@@ -17,7 +17,7 @@ class Youtube:
 
     def checkYoutube(self) -> bool:
         try:
-            WebDriverWait(self.driver, 30).until(ec.presence_of_element_located((
+            WebDriverWait(self.driver, 60).until(ec.presence_of_element_located((
                 By.CLASS_NAME, "iframe[id=video-player-youtube]")))
             return True
         except:
@@ -25,7 +25,7 @@ class Youtube:
 
     def setYoutubeQuality(self) -> bool:
         try:
-            WebDriverWait(self.driver, 30).until(ec.frame_to_be_available_and_switch_to_it((
+            WebDriverWait(self.driver, 60).until(ec.frame_to_be_available_and_switch_to_it((
                 By.CLASS_NAME, "iframe[id=video-player-youtube]")))
 
             # 开始播放

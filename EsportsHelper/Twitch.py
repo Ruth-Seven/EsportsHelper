@@ -15,7 +15,7 @@ class Twitch:
 
     def checkTwitch(self) -> bool:
         try:
-            wait = WebDriverWait(self.driver, 30)
+            wait = WebDriverWait(self.driver, 60)
             wait.until(ec.presence_of_element_located(
                 (By.CSS_SELECTOR, "iframe[title=Twitch]")))
             return True
@@ -27,7 +27,7 @@ class Twitch:
             if not self.checkTwitch():
                 return False
             self.driver.switch_to.frame(0)
-            wait = WebDriverWait(self.driver, 30)
+            wait = WebDriverWait(self.driver, 60)
             wait.until(ec.presence_of_element_located(
                 (By.CSS_SELECTOR, "button[data-a-target=player-settings-button]"))).click()
             time.sleep(1)  # wait for animation
