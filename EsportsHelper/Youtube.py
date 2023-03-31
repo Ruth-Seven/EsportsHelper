@@ -28,6 +28,7 @@ class Youtube:
             play_button = self.driver.find_element(By.CSS_SELECTOR, "button.ytp-play-button.ytp-button")
             if play_button.get_attribute("data-title-no-tooltip") == "Play":
                 play_button.click()
+            self.driver.switch_to.default_content()
 
             settingsButton = self.driver.find_element(By.CSS_SELECTOR, "button[data-tooltip-target-id=ytp-settings-button]")
             self.driver.execute_script("arguments[0].click();", settingsButton)
