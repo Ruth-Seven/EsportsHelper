@@ -33,6 +33,7 @@ class Match:
       
     def watchMatches(self, delay, max_run_hours):
         self.currentWindows = {}
+        self.retryTimes = 3
         self.mainWindow = self.driver.current_window_handle
         max_run_second = max_run_hours * 3600
         start_time_point = time.time()
