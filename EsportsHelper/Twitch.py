@@ -27,13 +27,16 @@ class Twitch:
             if not self.checkTwitch():
                 return False
             self.driver.switch_to.frame(0)
+            self.log.debug("进入twitch")
             wait = WebDriverWait(self.driver, 60)
             wait.until(ec.presence_of_element_located(
                 (By.CSS_SELECTOR, "button[data-a-target=player-settings-button]"))).click()
             time.sleep(1)  # wait for animation
+            self.log.debug("成功按下setting")
             wait.until(ec.presence_of_element_located(
                 (By.CSS_SELECTOR, "button[data-a-target=player-settings-menu-item-quality]"))).click()
             time.sleep(1)
+            self.log.debug("成功设置quality")
             wait.until(ec.presence_of_all_elements_located(
                 (By.CSS_SELECTOR, ("div[role=menuitemradio]"))))[-1].click()
             wait = WebDriverWait(self.driver, 30)
