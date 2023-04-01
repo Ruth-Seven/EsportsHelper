@@ -8,10 +8,11 @@ from traceback import format_exc
 import requests
 from lxml.html import fromstring
 from rich import print
-from selenium.common import WebDriverException,InvalidSwitchToTargetException
+from selenium.common import WebDriverException,InvalidSwitchToTargetException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
+
 
 from EsportsHelper.Rewards import Rewards
 from EsportsHelper.Twitch import Twitch
@@ -93,7 +94,7 @@ class Match:
                 wait.until(ec.presence_of_element_located(
                     (By.CSS_SELECTOR, ".EventDate")))
                 self.log.info("连接时间线成功")
-            except TimeoutError:
+            except TimeoutException:
                 self.log.error("网络不稳定，请检查网络")
                 return []
             elements = wait.until(ec.presence_of_all_elements_located(
@@ -152,7 +153,7 @@ class Match:
                 (By.CSS_SELECTOR, "button.osano-cm-accept-all"))).click()
             self.log.info("接受cookies")
             return True
-        except TimeoutError:
+        except TimeoutException:
             self.log.info("没有cookies")
             return True
         except Exception as e:
@@ -181,7 +182,6 @@ class Match:
 
             url = match
             self.driver.get(url)
-            time.sleep(30) # wait for stream
             if self.twitch.checkTwitch():
                 self.twitch.setTwitchQuality()
                 self.rewards.checkRewardable(url)

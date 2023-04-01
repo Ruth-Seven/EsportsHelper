@@ -21,21 +21,16 @@ class LoginHandler:
         self.driver.execute_script("arguments[0].click();", loginButton)
 
         self.log.info("눈_눈 登录中...")
-
         WebDriverWait(self.driver, 20).until(
-            ec.presence_of_element_located((By.CSS_SELECTOR, "input[name=username]"))
-            ).send_keys(username)
+            ec.presence_of_element_located(
+                (By.CSS_SELECTOR, "input[name=username]"))
+        ).send_keys(username)
         self.driver.find_element(
             By.CSS_SELECTOR, "input[name=password]").send_keys(password)
+        WebDriverWait(self.driver, 20).until(
+            ec.element_to_be_clickable((By.CSS_SELECTOR, "button[type=submit]"))).click()
 
-        time.sleep(0.5)  # wait for button
-        submitButton = self.driver.find_element(
-            By.CSS_SELECTOR, "button[type=submit]")
-        self.driver.execute_script("arguments[0].click();", submitButton)
-        try:
-            WebDriverWait(self.driver, 15).until(ec.presence_of_element_located(
-                (By.CSS_SELECTOR, "div.riotbar-summoner-name")))
-            self.log.info("∩_∩ 账密 提交成功")
-            return True
-        except TimeoutException:
-            return False
+        WebDriverWait(self.driver, 15).until(ec.presence_of_element_located(
+            (By.CSS_SELECTOR, "div.riotbar-summoner-name")))
+        self.log.info("∩_∩ 登陆成功")
+        return True

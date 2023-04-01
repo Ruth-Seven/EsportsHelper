@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
-from EsportsHelper.util import DebugScreen, KnockNotify, FalseRetries
+from EsportsHelper.util import DebugScreen, KnockNotify, FalseRetries, TimeOutRetriesRetunrBool
 
 
 class Rewards:
@@ -18,19 +18,18 @@ class Rewards:
         self.config = config
 
     def _isRewardMarkExist(self):
-        try:
-            box = WebDriverWait(self.driver, 60).until(ec.presence_of_element_located((By.CSS_SELECTOR,"div.status-items div.message")))
-            if "enjoy the show!" in box.get_attribute("innerHTML"):
-                return True
-            self.log.debug(f"Reward info: {box.get_attribute('innerHTML')}")
-            return False
-        except TimeoutException:
-            DebugScreen(self.driver, "isRewardMarkExist")
-            return False
-        except Exception as e:
-            DebugScreen(self.driver, "isRewardMarkExist")
-            self.log.error(f"无法检查是否可获取奖励: {e}")
-            return False
+        @TimeOutRetriesRetunrBool(3, "检查可获取奖励状态",
+                                  handle=lambda: DebugScreen(
+                                      self.driver, "isRewardMarkExist")
+                                  )
+        def inner():
+            box = WebDriverWait(self.driver, 60).until(ec.presence_of_element_located(
+                (By.CSS_SELECTOR, "div.status-items div.message")))
+            if not "enjoy the show!" in box.get_attribute("innerHTML"):
+                self.log.debug(f"Reward info: {box.get_attribute('innerHTML')}")
+                return False
+            return True
+        return inner()
 
     def checkRewardable(self, url) -> bool:
         splitUrl = url.split('/')
@@ -40,15 +39,14 @@ class Rewards:
         else:
             match = splitUrl[-1]
 
-        @FalseRetries(2, f"{match} 不能获取奖励")
-        def inner_check():
-            if self._isRewardMarkExist():
-                self.log.critical(f"√√√√√ {match} 正常观看 可获取奖励 √√√√√ ")
-                return True
-            else:
-                DebugScreen(self.driver, "checkRewardsfail")
-                return False
-        return inner_check()
+        if self._isRewardMarkExist():
+            self.log.critical(f"√√√√√ {match} 正常观看 可获取奖励 √√√√√ ")
+            return True
+        else:
+            DebugScreen(self.driver, "checkRewardsfail")
+            self.log.error(f"xxxxxx{match} 不能获取奖励 xxxxx")
+            return False
+
 
     def checkNewDrops(self):
         try:

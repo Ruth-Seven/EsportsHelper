@@ -7,7 +7,7 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 
-from EsportsHelper.util import DebugScreen
+from EsportsHelper.util import DebugScreen, TimeOutRetries, TimeOutRetriesRetunrBool
 
 
 class Youtube:
@@ -15,18 +15,24 @@ class Youtube:
         self.driver = driver
         self.log = log
 
+    @TimeOutRetriesRetunrBool(3, "检查Youtube载入")
     def checkYoutube(self) -> bool:
-        try:
-            WebDriverWait(self.driver, 60).until(ec.presence_of_element_located((
-                By.CLASS_NAME, "iframe[id=video-player-youtube]")))
-            return True
-        except:
-            return False
+        WebDriverWait(self.driver, 30).until(ec.presence_of_element_located((
+            By.CLASS_NAME, "iframe[id=video-player-youtube]")))
+        return True
+
 
     def setYoutubeQuality(self) -> bool:
-        try:
-            WebDriverWait(self.driver, 60).until(ec.frame_to_be_available_and_switch_to_it((
-                By.CLASS_NAME, "iframe[id=video-player-youtube]")))
+        
+        @TimeOutRetriesRetunrBool(3, "°D° Youtube 清晰度设置", "可能网络超时",
+                        handle=lambda:
+                        (DebugScreen(self.driver, "setYoutubeQuality"),
+                         self.driver.switch_to.default_content())[-1]
+                        )
+        def inner():
+            if not self.checkYoutube():
+                return False
+            self.driver.switch_to.frome(0)
             self.log.debug("进入Youtube player")
 
             # 开始播放
@@ -43,7 +49,7 @@ class Youtube:
             # quality div
             time.sleep(1)  # wait for animation
             WebDriverWait(self.driver, 5).until(ec.element_to_be_clickable(
-                (By.XPATH, "//div[contains(text(),'Quality')]"))).click()            
+                (By.XPATH, "//div[contains(text(),'Quality')]"))).click()
             self.log.debug("成功设置quality")
             # 140p div
             time.sleep(1)
@@ -53,15 +59,4 @@ class Youtube:
             self.driver.switch_to.default_content()
             self.log.info(">_< Youtube 144p清晰度设置成功")
             return True
-
-        except TimeoutException as e:
-            DebugScreen(self.driver, "setYoutubeQuality")
-            self.driver.switch_to.default_content()
-            self.log.error(f"°D° Youtube 清晰度设置失败: 网络超时{e}")
-            return False
-
-        except Exception as e:
-            DebugScreen(self.driver, "setYoutubeQuality")
-            self.driver.switch_to.default_content()
-            self.log.error(f"°D° Youtube 清晰度设置失败: {e}")
-            return False
+        return inner()

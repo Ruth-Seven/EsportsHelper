@@ -38,7 +38,6 @@ def Watch(config):
   
     if not loginHandler.automaticLogIn(config.username, config.password):
         Quit(driver, "登陆失败")
-    log.info("∩_∩ 好嘞 登录成功")
 
     Match(log=log, driver=driver, config=config).watchMatches(
         delay=config.delay, max_run_hours=config.max_run_hours)
