@@ -40,8 +40,8 @@ def Quit(driver=None, e=None):
     log.info("------程序退出------")
 
     try:
-        log.info("------关闭Chrome Driver------")
         driver.quit()
+        log.info("------关闭Chrome Driver------")
     except: 
         pass
     quit()
@@ -76,7 +76,7 @@ def TimeOutRetries(times=3, msg="操作", hint="请检查", errorHandle=lambda :
         return Warp
     return inner
 
-def TimeOutRetriesRetunrBool(times=3, msg="操作", hint="请检查", errorHandle=lambda : None, returnHandle=lambda : None):
+def TimeOutRetriesRetunrBool(times=3, msg="操作", hint="", errorHandle=lambda : None, returnHandle=lambda : None):
     def inner(func):
         @functools.wraps(func)
         def Warp(*args, **vargs):
@@ -103,7 +103,7 @@ def TimeOutRetriesRetunrBool(times=3, msg="操作", hint="请检查", errorHandl
 
 
 
-def FalseRetries(times=3, msg="", hint="请检查"):
+def FalseRetries(times=3, msg="", hint=""):
     def inner(func):
         @functools.wraps(func)
         def Wrap(*args, **vargs):

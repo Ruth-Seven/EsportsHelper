@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from random import randint
 from sys import exit
 from time import sleep
-from traceback import format_exc
+from traceback import print_exc
 
 import requests
 from lxml.html import fromstring
@@ -114,14 +114,15 @@ class Match:
             hour = tree.cssselect(".hour")[0].text_content()
             ampm = tree.cssselect(".ampm")[0].text_content()
             team1 = tree.cssselect(
-                "div.team-info > h2 > span.name")[0].text_content()
+                "div.team.team1 span.name")[0].text_content()
             team2 = tree.cssselect(
-                "div.team-info h2 >  span.name")[1].text_content()
+                "div.team.team2 span.name")[0].text_content()
             league = tree.cssselect("div.league > div.name")[0].text_content()
             self.log.info(
                 f"下一场比赛:  {team1} vs {team2}  在 {league} 赛区 {hour}{ampm} 举行")
         except Exception as e:
             self.log.error(f"获取下一场比赛信息失败 {e}")
+            self.log.error(print_exc())
 
     def closeFinishedTabs(self, liveMatches):
         try:
@@ -149,7 +150,7 @@ class Match:
 
     def startWatchNewMatches(self, liveMatches, disWatchMatches):
         newLiveMatches = set(liveMatches) - set(self.currentWindows.keys())
-        for match in newLiveMatches:
+        for index, match in enumerate(newLiveMatches):
             flag = True
             for disMatch in disWatchMatches:
                 if match.find(disMatch) != -1:
@@ -158,32 +159,34 @@ class Match:
                         skipName = splitUrl[-2]
                     else:
                         skipName = splitUrl[-1]
-                    self.log.info(f"(╯#-_-)╯ {skipName}比赛跳过.")
+                    self.log.info(
+                        f"(╯#-_-)╯ {skipName}比赛跳过. ({index + 1} / {len(newLiveMatches)})")
                     flag = False
                     break
             if not flag:
                 continue
             self.driver.switch_to.new_window('tab')
             self.currentWindows[match] = self.driver.current_window_handle
-            self.log.info(f"●_●正在打开直播")
+            self.log.info(f"●_●正在打开直播 ({index + 1} / {len(newLiveMatches)})")
 
             url = match
             self.driver.get(url)
             self.initLiveStatus()
 
     def SwitchStream(self, url) -> bool:
-        
+
         def clickOptionButton(time=25):
             try:
-                sleep(time) # wait for switching stream
+                sleep(time)  # wait for switching stream
                 WebDriverWait(self.driver, time).until(ec.element_to_be_clickable(
-                    (By.CSS_SELECTOR, "div.options-button"))).click() 
+                    (By.CSS_SELECTOR, "div.options-button"))).click()
             except Exception as e:
                 self.log.error(f"点击stream bution 错误: {e}")
-        
+
         def closeOptionButton():
             try:
-                self.driver.find_element(By.CSS_SELECTOR, "div.overview-pane").click()
+                self.driver.find_element(
+                    By.CSS_SELECTOR, "div.overview-pane").click()
             except Exception as e:
                 self.log.error(f"取消窗口出错: {e}")
 
@@ -192,25 +195,25 @@ class Match:
         def inner():
             clickOptionButton(20)
             time.sleep(1)  # wait for animation
-            WebDriverWait(self.driver, 3).until(ec.presence_of_all_elements_located(
+            WebDriverWait(self.driver, 10).until(ec.presence_of_all_elements_located(
                 (By.CSS_SELECTOR, "div.options-section.stream-section  div.options-list div.option")))[0].click()
             time.sleep(1)
             try:
-                WebDriverWait(self.driver, 3).until(ec.presence_of_element_located(
+                WebDriverWait(self.driver, 10).until(ec.presence_of_element_located(
                     (By.CSS_SELECTOR, ("div.options-section.provider-selection ul.providers.options-list  li.option.twitch")))).click()
                 self.log.info("成功切换到Twitch源")
                 return True
             except:
                 self.log.info(f"该比赛没有twitch源，尝试切换Youtube源")
                 try:
-                    WebDriverWait(self.driver, 3).until(ec.presence_of_element_located(
+                    WebDriverWait(self.driver, 10).until(ec.presence_of_element_located(
                         (By.CSS_SELECTOR, ("div.options-section.provider-selection ul.providers.options-list  li.option.youtube")))).click()
                     self.log.info("成功切换到Youtube源")
                 except:
-                    self.log.error(f"没有Youtube源，放弃切换")
+                    self.log.warn(f"没有Youtube源，放弃切换")
                     return False
             return False
-        
+
         return inner()
 
     def initLiveStatus(self):
@@ -226,6 +229,7 @@ class Match:
 
     @FalseRetries(3, "刷新live并尝试保持获取状态")
     def resetLivePage(self):
+        self.log.info("刷新live画面ing...")
         self.driver.refresh()
         return self.initLiveStatus()
 

@@ -11,7 +11,6 @@ class Webdriver:
     def createWebdriver(self, conf):
         options = self.addWebdriverOptions(uc.ChromeOptions(), conf)
         log.info("ㅍ_ㅍ 正在准备中...")
-    
         if self.config.platForm == "linux":
             driver = uc.Chrome(options=options)
             driver.set_page_load_timeout(30)
@@ -28,7 +27,8 @@ class Webdriver:
 
     def addWebdriverOptions(self, options, conf):
         options.page_load_strategy = 'normal'
-        
+        options.add_argument("--lang=en")
+        options.add_argument("--accept-lang=en")
         options.add_argument("--disable-extensions")
         options.add_argument('--disable-audio-output')
         options.add_argument( f'--proxy-server={conf.proxy}' )
@@ -42,7 +42,8 @@ class Webdriver:
         }
         options.add_experimental_option('prefs', prefs)
         # options.add_argument('--no-sandbox')
-        # user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.44"
-        user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
+        windows_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36 Edg/111.0.1661.44"
+        mac_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
+        user_agent = windows_agent if "win" in self.config.platForm else mac_agent 
         options.add_argument(f'user-agent={user_agent}')
         return options

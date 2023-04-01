@@ -20,10 +20,11 @@ class Rewards:
     def _isRewardMarkExist(self):
         @FalseRetries(3, "检查可获取奖励状态")
         def inner():
-            time.sleep(10) # wait for stream cache
+            time.sleep(10)  # wait for stream cache
             box = WebDriverWait(self.driver, 60).until(ec.presence_of_element_located(
-                (By.CSS_SELECTOR, "div.status-items div.message")))
-            if not "enjoy the show!" in box.get_attribute("innerHTML"):
+                (By.CSS_SELECTOR, "div.status-items div.status-icon svg.icon path.shape")))
+            # After logining, the red color means keep away from rewards.
+            if "#DE2F2F" in box.get_attribute("fill"):
                 self.log.debug(
                     f"Reward info: {box.get_attribute('innerHTML')}")
                 DebugScreen(self.driver, "isRewardMarkExist")

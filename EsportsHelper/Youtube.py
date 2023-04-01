@@ -41,8 +41,8 @@ class Youtube:
             # 开始播放
             play_button = WebDriverWait(self.driver, 30).until(
                 ec.element_to_be_clickable((By.CSS_SELECTOR, "button.ytp-play-button.ytp-button")))
-            if play_button.get_attribute("data-title-no-tooltip") == "Play":
-                play_button.click()
+            # if play_button.get_attribute("data-title-no-tooltip") == "Play": 
+            play_button.click()
             self.log.debug("启动播放")
 
             # setting_button
