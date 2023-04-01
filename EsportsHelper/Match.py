@@ -181,6 +181,7 @@ class Match:
 
             url = match
             self.driver.get(url)
+            time.sleep(30) # wait for stream
             if self.twitch.checkTwitch():
                 self.twitch.setTwitchQuality()
                 self.rewards.checkRewardable(url)
