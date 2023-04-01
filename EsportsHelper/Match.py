@@ -16,7 +16,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from EsportsHelper.Rewards import Rewards
 from EsportsHelper.Twitch import Twitch
-from EsportsHelper.util import FalseRetries, Quit, TimeOutRetriesRetunrBool
+from EsportsHelper.util import FalseRetries, Quit, TimeOutRetriesRetunrBool, matchUrl2Match
 from EsportsHelper.Youtube import Youtube
 
 
@@ -28,11 +28,11 @@ class Match:
         self.rewards = Rewards(log=log, driver=driver, config=config)
         self.twitch = Twitch(driver=driver, log=log)
         self.youtube = Youtube(driver=driver, log=log)
-        self.currentWindows = {}
+        self.liveWindows = {}
         self.mainWindow = self.driver.current_window_handle
 
     def watchMatches(self, delay, max_run_hours):
-        self.currentWindows = {}
+        self.liveWindows = {}
         self.retryTimes = 3
         self.mainWindow = self.driver.current_window_handle
         max_run_second = max_run_hours * 3600
@@ -127,50 +127,42 @@ class Match:
     def closeFinishedTabs(self, liveMatches):
         try:
             removeList = []
-            for k in self.currentWindows.keys():
-                self.driver.switch_to.window(self.currentWindows[k])
-                if k not in liveMatches:
-                    splitUrl = k.split('/')
-                    if splitUrl[-2] != "live":
-                        match = splitUrl[-2]
-                    else:
-                        match = splitUrl[-1]
-                    self.log.info(f"0.0 {match} 比赛结束.")
+            for url in self.liveWindows.keys():
+                self.driver.switch_to.window(self.liveWindows[url])
+                if url not in liveMatches:
+                    self.log.info(f"0.0 {matchUrl2Match(url)} 比赛结束.")
                     self.driver.close()
-                    removeList.append(k)
+                    removeList.append(url)
                     self.driver.switch_to.window(self.mainWindow)
                 else:
-                    if not self.rewards.checkRewardable(k):
+                    if not self.rewards.checkRewardable(url):
                         self.resetLivePage()
-            for k in removeList:
-                self.currentWindows.pop(k, None)
+            for url in removeList:
+                self.liveWindows.pop(url, None)
             self.driver.switch_to.window(self.mainWindow)
         except Exception as e:
-            self.log.error(f"关闭窗口出错: {e}")
+            self.log.error(f"关闭窗口出错: {e} \n {print_exc()}")
+
 
     def startWatchNewMatches(self, liveMatches, disWatchMatches):
-        newLiveMatches = set(liveMatches) - set(self.currentWindows.keys())
-        for index, match in enumerate(newLiveMatches):
-            flag = True
-            for disMatch in disWatchMatches:
-                if match.find(disMatch) != -1:
-                    splitUrl = match.split('/')
-                    if splitUrl[-2] != "live":
-                        skipName = splitUrl[-2]
-                    else:
-                        skipName = splitUrl[-1]
-                    self.log.info(
-                        f"(╯#-_-)╯ {skipName}比赛跳过. ({index + 1} / {len(newLiveMatches)})")
-                    flag = False
-                    break
-            if not flag:
+        newLiveMatches = set(liveMatches) - set(self.liveWindows.keys())
+        for index, matchUrl in enumerate(newLiveMatches):
+            
+            def skipMatches():
+                for disMatch in disWatchMatches:
+                    if disMatch in matchUrl:
+                        self.log.info(
+                            f"(╯#-_-)╯ {disMatch}比赛跳过. ({index + 1} / {len(newLiveMatches)})")
+                        return True
+                return False
+            if skipMatches():
                 continue
+            
             self.driver.switch_to.new_window('tab')
-            self.currentWindows[match] = self.driver.current_window_handle
+            self.liveWindows[matchUrl] = self.driver.current_window_handle
             self.log.info(f"●_●正在打开直播 ({index + 1} / {len(newLiveMatches)})")
 
-            url = match
-            self.driver.get(url)
+            self.driver.get(matchUrl)
             self.initLiveStatus()
 
     def SwitchStream(self, url) -> bool:

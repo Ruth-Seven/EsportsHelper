@@ -118,3 +118,11 @@ def FalseRetries(times=3, msg="", hint=""):
             return False
         return Wrap
     return inner
+
+def matchUrl2Match(url):
+    splitUrl = url.split('/')
+    if splitUrl[-2] != "live":
+        match = splitUrl[-2]
+    else:
+        match = splitUrl[-1]
+    return match
