@@ -133,7 +133,7 @@ class Match:
                         match = splitUrl[-2]
                     else:
                         match = splitUrl[-1]
-                    self.log.info(f"0.0 {match} 比赛结束. {e}")
+                    self.log.info(f"0.0 {match} 比赛结束.")
                     self.driver.close()
                     removeList.append(k)
                     self.driver.switch_to.window(self.mainWindow)
