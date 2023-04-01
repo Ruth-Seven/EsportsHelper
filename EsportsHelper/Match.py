@@ -8,7 +8,7 @@ from traceback import format_exc
 import requests
 from lxml.html import fromstring
 from rich import print
-from selenium.common import WebDriverException,InvalidSwitchToTargetException, TimeoutException
+from selenium.common import WebDriverException, InvalidSwitchToTargetException, TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
@@ -16,7 +16,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from EsportsHelper.Rewards import Rewards
 from EsportsHelper.Twitch import Twitch
-from EsportsHelper.util import  FalseRetries, Quit, TimeOutRetriesRetunrBool
+from EsportsHelper.util import FalseRetries, Quit, TimeOutRetriesRetunrBool
 from EsportsHelper.Youtube import Youtube
 
 
@@ -182,8 +182,7 @@ class Match:
 
             url = match
             self.driver.get(url)
-            self.SwitchIntoTwitch(url)
-
+            self.SwitchStream(url)
             if self.twitch.checkTwitch():
                 self.twitch.setTwitchQuality()
                 self.rewards.checkRewardable(url)
@@ -193,14 +192,20 @@ class Match:
             else:
                 self.log.error(f"不支持的视频流, 请联系owner with: {url}")
 
+    def SwitchStream(self, url) -> bool:
 
-    def SwitchIntoTwitch(self, url) -> bool:
-        @TimeOutRetriesRetunrBool(3, "切换播放源到Twitch", f"联系ower with {url}")
-        def inner():    
+        def clickOptionButton(self, time=3):
+            try:
+                WebDriverWait(self.driver, time).until(ec.presence_of_element_located(
+                    (By.CSS_SELECTOR, "div.options-button"))).click()  # 恢复屏幕状态
+            except:
+                pass
+
+        @TimeOutRetriesRetunrBool(3, "切换播放源到Twitch", f"联系ower with {url}",
+                                  handle=clickOptionButton, returnHandle=clickOptionButton)
+        def inner():
             wait = WebDriverWait(self.driver, 30)
-            wait.until(ec.presence_of_element_located(
-                (By.CSS_SELECTOR, "div.options-button"))).click()
-
+            clickOptionButton(5)
             time.sleep(1)  # wait for animation
             wait.until(ec.presence_of_all_elements_located(
                 (By.CSS_SELECTOR, "div.options-section.stream-section  div.options-list div.option")))[0].click()
@@ -208,13 +213,15 @@ class Match:
             try:
                 wait.until(ec.presence_of_element_located(
                     (By.CSS_SELECTOR, ("div.options-section.provider-selection ul.providers.options-list  li.option.twitch")))).click()
-            except: 
-                self.log.info(f"该比赛没有twitch源，放弃切换")
-                return False
-            wait.until(ec.presence_of_element_located(
-                (By.CSS_SELECTOR, "div.options-button"))).click() #恢复屏幕状态
-
-            self.log.info("成功切换到Twitch源")
+            except:
+                self.log.info(f"该比赛没有twitch源，尝试切换Youtube源")
+                try:
+                    wait.until(ec.presence_of_element_located(
+                        (By.CSS_SELECTOR, ("div.options-section.provider-selection ul.providers.options-list  li.option.youtube")))).click()
+                    self.log.info("成功切换到Youtube源")
+                except:
+                    self.log.error(f"没有Youtube源，放弃切换")
+                    return False
+            time.sleep(0.5)
             return True
         return inner()
-        

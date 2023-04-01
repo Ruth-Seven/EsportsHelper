@@ -76,7 +76,7 @@ def TimeOutRetries(times=3, msg="操作", hint="请检查", handle=lambda : None
         return Warp
     return inner
 
-def TimeOutRetriesRetunrBool(times=3, msg="操作", hint="请检查", handle=lambda : None):
+def TimeOutRetriesRetunrBool(times=3, msg="操作", hint="请检查", handle=lambda : None, returnHandle=lambda : None):
     def inner(func):
         @functools.wraps(func)
         def Warp(*args, **vargs):
@@ -84,7 +84,9 @@ def TimeOutRetriesRetunrBool(times=3, msg="操作", hint="请检查", handle=lam
             while retries > 0:
                 retries = retries - 1
                 try:
-                    return func(*args, **vargs)
+                    res = func(*args, **vargs)
+                    returnHandle()
+                    return res 
                 except TimeoutException as e:
                     retries = retries - 1
                     handle()
