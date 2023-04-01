@@ -30,7 +30,7 @@ class Twitch:
                 return False
             self.driver.switch_to.frame(0)
             self.log.debug("进入twitch")
-            wait = WebDriverWait(self.driver, 10)
+            wait = WebDriverWait(self.driver, 30)
             wait.until(ec.presence_of_element_located(
                 (By.CSS_SELECTOR, "button[data-a-target=player-settings-button]"))).click()
             time.sleep(1)  # wait for animation
