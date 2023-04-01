@@ -19,20 +19,23 @@ class Youtube:
     def checkYoutube(self) -> bool:
         WebDriverWait(self.driver, 30).until(ec.presence_of_element_located((
             By.CSS_SELECTOR, "iframe[id=video-player-youtube]")))
+        self.log.debug("确定是Youtube播放器")
         return True
 
-
     def setYoutubeQuality(self) -> bool:
+
+        def handle(): 
+            DebugScreen(self.driver, "setYoutubeQuality"),
+            self.driver.switch_to.default_content()
         
         @TimeOutRetriesRetunrBool(3, "°D° Youtube 清晰度设置", "可能网络超时",
-                        errorHandle=lambda:
-                        (DebugScreen(self.driver, "setYoutubeQuality"),
-                         self.driver.switch_to.default_content())[-1]
-                        )
+                                  errorHandle=handle, returnHandle=handle)
         def inner():
             if not self.checkYoutube():
+                self.log.error("该页面没有Youtube播放器")
                 return False
-            self.driver.switch_to.frame(0)
+            
+            self.driver.switch_to.frame("video-player-youtube")
             self.log.debug("进入Youtube player")
 
             # 开始播放

@@ -139,26 +139,13 @@ class Match:
                     removeList.append(k)
                     self.driver.switch_to.window(self.mainWindow)
                 else:
-                    self.rewards.checkRewardable(k)
+                    if not self.rewards.checkRewardable(k):
+                        self.resetLivePage()
             for k in removeList:
                 self.currentWindows.pop(k, None)
             self.driver.switch_to.window(self.mainWindow)
         except Exception as e:
             self.log.error(f"关闭窗口出错: {e}")
-
-    @FalseRetries(3, "cookies接受失败")
-    def acceptCookies(self):
-        try:
-            WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable(
-                (By.CSS_SELECTOR, "button.osano-cm-accept-all"))).click()
-            self.log.info("接受cookies")
-            return True
-        except TimeoutException:
-            self.log.info("没有cookies")
-            return True
-        except Exception as e:
-            self.log.error(f"接受cookies时发生错误: {e}")
-            return False
 
     def startWatchNewMatches(self, liveMatches, disWatchMatches):
         newLiveMatches = set(liveMatches) - set(self.currentWindows.keys())
@@ -182,15 +169,7 @@ class Match:
 
             url = match
             self.driver.get(url)
-            self.SwitchStream(url)
-            if self.twitch.checkTwitch():
-                self.twitch.setTwitchQuality()
-                self.rewards.checkRewardable(url)
-            elif self.youtube.checkYoutube():
-                self.youtube.setYoutubeQuality()
-                self.rewards.checkRewardable(url)
-            else:
-                self.log.error(f"不支持的视频流, 请联系owner with: {url}")
+            self.initLiveStatus()
 
     def SwitchStream(self, url) -> bool:
         
@@ -233,3 +212,33 @@ class Match:
             return False
         
         return inner()
+
+    def initLiveStatus(self):
+        url = self.driver.current_url
+        self.SwitchStream(url)
+        if self.twitch.checkTwitch():
+            self.twitch.setTwitchQuality()
+        elif self.youtube.checkYoutube():
+            self.youtube.setYoutubeQuality()
+        else:
+            self.log.error(f"不支持的视频流, 请联系owner with: {url}")
+        return self.rewards.checkRewardable(url)
+
+    @FalseRetries(3, "刷新live并尝试保持获取状态")
+    def resetLivePage(self):
+        self.driver.refresh()
+        return self.initLiveStatus()
+
+    @FalseRetries(3, "cookies接受失败")
+    def acceptCookies(self):
+        try:
+            WebDriverWait(self.driver, 15).until(ec.element_to_be_clickable(
+                (By.CSS_SELECTOR, "button.osano-cm-accept-all"))).click()
+            self.log.info("接受cookies")
+            return True
+        except TimeoutException:
+            self.log.info("没有cookies")
+            return True
+        except Exception as e:
+            self.log.error(f"接受cookies时发生错误: {e}")
+            return False

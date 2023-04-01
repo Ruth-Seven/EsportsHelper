@@ -17,6 +17,7 @@ class Twitch:
     def checkTwitch(self) -> bool:
         WebDriverWait(self.driver, 15).until(ec.presence_of_element_located(
             (By.CSS_SELECTOR, "iframe[title=Twitch]")))
+        self.log.debug("确定是Twitch播放器")
         return True
 
     def setTwitchQuality(self) -> bool:
@@ -27,8 +28,9 @@ class Twitch:
         @TimeOutRetriesRetunrBool(3, "°D° Twitch 清晰度设置失败", "请检查网络", errorHandle=defer)
         def inner():
             if not self.checkTwitch():
+                self.log.error("该页面没有Twitch播放器")
                 return False
-            self.driver.switch_to.frame(0)
+            self.driver.switch_to.frame(self.driver.find_element(By.CSS_SELECTOR, "iframe[title=Twitch]"))
             self.log.debug("进入twitch")
             wait = WebDriverWait(self.driver, 30)
             wait.until(ec.presence_of_element_located(
