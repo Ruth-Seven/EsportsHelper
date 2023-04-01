@@ -16,7 +16,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from EsportsHelper.Rewards import Rewards
 from EsportsHelper.Twitch import Twitch
-from EsportsHelper.util import  FalseRetries, Quit
+from EsportsHelper.util import  FalseRetries, Quit, TimeOutRetriesRetunrBool
 from EsportsHelper.Youtube import Youtube
 
 
@@ -182,6 +182,8 @@ class Match:
 
             url = match
             self.driver.get(url)
+            self.SwitchIntoTwitch(url)
+
             if self.twitch.checkTwitch():
                 self.twitch.setTwitchQuality()
                 self.rewards.checkRewardable(url)
@@ -190,3 +192,29 @@ class Match:
                 self.rewards.checkRewardable(url)
             else:
                 self.log.error(f"不支持的视频流, 请联系owner with: {url}")
+
+
+    def SwitchIntoTwitch(self, url) -> bool:
+        @TimeOutRetriesRetunrBool(3, "切换播放源到Twitch", f"联系ower with {url}")
+        def inner():    
+            wait = WebDriverWait(self.driver, 30)
+            wait.until(ec.presence_of_element_located(
+                (By.CSS_SELECTOR, "div.options-button"))).click()
+
+            time.sleep(1)  # wait for animation
+            wait.until(ec.presence_of_all_elements_located(
+                (By.CSS_SELECTOR, "div.options-section.stream-section  div.options-list div.option")))[0].click()
+            time.sleep(1)
+            try:
+                wait.until(ec.presence_of_element_located(
+                    (By.CSS_SELECTOR, ("div.options-section.provider-selection ul.providers.options-list  li.option.twitch")))).click()
+            except: 
+                self.log.info(f"该比赛没有twitch源，放弃切换")
+                return False
+            wait.until(ec.presence_of_element_located(
+                (By.CSS_SELECTOR, "div.options-button"))).click() #恢复屏幕状态
+
+            self.log.info("成功切换到Twitch源")
+            return True
+        return inner()
+        

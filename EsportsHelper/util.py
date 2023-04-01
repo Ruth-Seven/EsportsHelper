@@ -90,6 +90,7 @@ def TimeOutRetriesRetunrBool(times=3, msg="操作", hint="请检查", handle=lam
                     handle()
                     if retries <= 0:
                         log.error(msg + " 超时重试多次 " + hint)
+                    return False
                 except Exception as e:
                     handle()
                     log.error(msg + f"失败: {e}")
@@ -100,7 +101,7 @@ def TimeOutRetriesRetunrBool(times=3, msg="操作", hint="请检查", handle=lam
 
 
 
-def FalseRetries(times=3, msg=""):
+def FalseRetries(times=3, msg="", hint="请检查"):
     def inner(func):
         @functools.wraps(func)
         def Wrap(*args, **vargs):
@@ -110,8 +111,8 @@ def FalseRetries(times=3, msg=""):
                 if func(*args, **vargs):
                     return True
                 else:
-                    log.warn(msg + ", 重试中")
-            log.error(msg + ", 重试失败") 
+                    log.warn(msg + "失败 重试中 " + hint)
+            log.error(msg + ", 重试失败 " + hint)
             return False
         return Wrap
     return inner

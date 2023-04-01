@@ -18,15 +18,15 @@ class Rewards:
         self.config = config
 
     def _isRewardMarkExist(self):
-        @TimeOutRetriesRetunrBool(3, "检查可获取奖励状态",
-                                  handle=lambda: DebugScreen(
-                                      self.driver, "isRewardMarkExist")
-                                  )
+        @FalseRetries(3, "检查可获取奖励状态")
         def inner():
+            time.sleep(10) # wait for stream cache
             box = WebDriverWait(self.driver, 60).until(ec.presence_of_element_located(
                 (By.CSS_SELECTOR, "div.status-items div.message")))
             if not "enjoy the show!" in box.get_attribute("innerHTML"):
-                self.log.debug(f"Reward info: {box.get_attribute('innerHTML')}")
+                self.log.debug(
+                    f"Reward info: {box.get_attribute('innerHTML')}")
+                DebugScreen(self.driver, "isRewardMarkExist")
                 return False
             return True
         return inner()
@@ -46,7 +46,6 @@ class Rewards:
             DebugScreen(self.driver, "checkRewardsfail")
             self.log.error(f"xxxxxx{match} 不能获取奖励 xxxxx")
             return False
-
 
     def checkNewDrops(self):
         try:
