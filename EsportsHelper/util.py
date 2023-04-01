@@ -54,7 +54,7 @@ def DebugScreen(driver, lint=""):
         driver.save_screenshot(png)
 
 
-def TimeOutRetries(times=3, msg="操作", hint="请检查", handle=lambda : None):
+def TimeOutRetries(times=3, msg="操作", hint="请检查", errorHandle=lambda : None):
     def inner(func):
         @functools.wraps(func)
         def Warp(*args, **vargs):
@@ -65,18 +65,18 @@ def TimeOutRetries(times=3, msg="操作", hint="请检查", handle=lambda : None
                     return func(*args, **vargs)
                 except TimeoutException as e:
                     retries = retries - 1
-                    handle()
+                    errorHandle()
                     if retries <= 0:
                         log.error(msg + " 超时重试多次 " + hint)
                 except Exception as e:
-                    handle()
+                    errorHandle()
                     log.error(msg + f"失败: {e}")
                     raise e
 
         return Warp
     return inner
 
-def TimeOutRetriesRetunrBool(times=3, msg="操作", hint="请检查", handle=lambda : None, returnHandle=lambda : None):
+def TimeOutRetriesRetunrBool(times=3, msg="操作", hint="请检查", errorHandle=lambda : None, returnHandle=lambda : None):
     def inner(func):
         @functools.wraps(func)
         def Warp(*args, **vargs):
@@ -89,12 +89,12 @@ def TimeOutRetriesRetunrBool(times=3, msg="操作", hint="请检查", handle=lam
                     return res 
                 except TimeoutException as e:
                     retries = retries - 1
-                    handle()
+                    errorHandle()
                     if retries <= 0:
                         log.error(msg + " 超时重试多次 " + hint)
                     return False
                 except Exception as e:
-                    handle()
+                    errorHandle()
                     log.error(msg + f"失败: {e}")
                     return False
             return False

@@ -44,7 +44,7 @@ class Rewards:
             return True
         else:
             DebugScreen(self.driver, "checkRewardsfail")
-            self.log.error(f"xxxxxx{match} 不能获取奖励 xxxxx")
+            self.log.error(f"xxxxxx {match} 不能获取奖励 xxxxx")
             return False
 
     def checkNewDrops(self):

@@ -193,35 +193,43 @@ class Match:
                 self.log.error(f"不支持的视频流, 请联系owner with: {url}")
 
     def SwitchStream(self, url) -> bool:
-
-        def clickOptionButton(self, time=3):
+        
+        def clickOptionButton(time=25):
             try:
-                WebDriverWait(self.driver, time).until(ec.presence_of_element_located(
-                    (By.CSS_SELECTOR, "div.options-button"))).click()  # 恢复屏幕状态
-            except:
-                pass
+                sleep(time) # wait for switching stream
+                WebDriverWait(self.driver, time).until(ec.element_to_be_clickable(
+                    (By.CSS_SELECTOR, "div.options-button"))).click() 
+            except Exception as e:
+                self.log.error(f"点击stream bution 错误: {e}")
+        
+        def closeOptionButton():
+            try:
+                self.driver.find_element(By.CSS_SELECTOR, "div.overview-pane").click()
+            except Exception as e:
+                self.log.error(f"取消窗口出错: {e}")
 
         @TimeOutRetriesRetunrBool(3, "切换播放源到Twitch", f"联系ower with {url}",
-                                  handle=clickOptionButton, returnHandle=clickOptionButton)
+                                  errorHandle=clickOptionButton, returnHandle=closeOptionButton)
         def inner():
-            wait = WebDriverWait(self.driver, 30)
-            clickOptionButton(5)
+            clickOptionButton(20)
             time.sleep(1)  # wait for animation
-            wait.until(ec.presence_of_all_elements_located(
+            WebDriverWait(self.driver, 3).until(ec.presence_of_all_elements_located(
                 (By.CSS_SELECTOR, "div.options-section.stream-section  div.options-list div.option")))[0].click()
             time.sleep(1)
             try:
-                wait.until(ec.presence_of_element_located(
+                WebDriverWait(self.driver, 3).until(ec.presence_of_element_located(
                     (By.CSS_SELECTOR, ("div.options-section.provider-selection ul.providers.options-list  li.option.twitch")))).click()
+                self.log.info("成功切换到Twitch源")
+                return True
             except:
                 self.log.info(f"该比赛没有twitch源，尝试切换Youtube源")
                 try:
-                    wait.until(ec.presence_of_element_located(
+                    WebDriverWait(self.driver, 3).until(ec.presence_of_element_located(
                         (By.CSS_SELECTOR, ("div.options-section.provider-selection ul.providers.options-list  li.option.youtube")))).click()
                     self.log.info("成功切换到Youtube源")
                 except:
                     self.log.error(f"没有Youtube源，放弃切换")
                     return False
-            time.sleep(0.5)
-            return True
+            return False
+        
         return inner()

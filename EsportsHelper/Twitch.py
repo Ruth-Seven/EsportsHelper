@@ -24,7 +24,7 @@ class Twitch:
             DebugScreen(self.driver, "setTwitchQuality")
             self.driver.switch_to.default_content()
 
-        @TimeOutRetriesRetunrBool(3, "°D° Twitch 清晰度设置失败", "请检查网络", handle=defer)
+        @TimeOutRetriesRetunrBool(3, "°D° Twitch 清晰度设置失败", "请检查网络", errorHandle=defer)
         def inner():
             if not self.checkTwitch():
                 return False
