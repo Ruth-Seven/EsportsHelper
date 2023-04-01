@@ -1,6 +1,6 @@
 import requests as req
 
-from traceback import print_exc
+from traceback import format_exc
 from rich import print
 from EsportsHelper.Logger import log
 

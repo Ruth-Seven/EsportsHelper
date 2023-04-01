@@ -3,6 +3,8 @@ import time
 import traceback
 import functools
 
+from traceback import format_exc
+
 from selenium.common.exceptions import TimeoutException
 
 
@@ -36,7 +38,7 @@ def Quit(driver=None, e=None):
     if e:
         KnockNotify(f"🥵停止挂机: '{e}'")
         log.error(e)
-    log.error(f"trace : \n{traceback.print_exc()}")
+    log.error(f"trace : \n{traceback.format_exc()}")
     log.info("------程序退出------")
 
     try:
@@ -95,7 +97,7 @@ def TimeOutRetriesRetunrBool(times=3, msg="操作", hint="", errorHandle=lambda 
                     return False
                 except Exception as e:
                     errorHandle()
-                    log.error(msg + f"失败: {e}")
+                    log.error(msg + f"失败: {e} \n {format_exc()}")
                     return False
             return False
         return Warp

@@ -1,7 +1,9 @@
 
 import time
+from traceback import format_exc
 from rich import print
 from selenium.webdriver.common.by import By
+from selenium.common import NoSuchElementException
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
@@ -20,6 +22,16 @@ class Twitch:
         self.log.debug("确定是Twitch播放器")
         return True
 
+    def checkTwitchHealth(self) -> bool: 
+        try:
+            self.driver.find_element(By.CLASS_NAME, "div[data-a-target=tw-core-button-label-text]")[2].click()
+            self.log.info("重新载入Twitch Stream 因为网络带宽问题")
+            return True
+        except (TimeoutError, NoSuchElementException):
+            return True
+        except Exception as e:
+            self.log.error(f"点击重载button出错 {e}\n {format_exc()}")
+        
     def setTwitchQuality(self) -> bool:
         def defer():
             DebugScreen(self.driver, "setTwitchQuality")
@@ -32,6 +44,9 @@ class Twitch:
                 return False
             self.driver.switch_to.frame(self.driver.find_element(By.CSS_SELECTOR, "iframe[title=Twitch]"))
             self.log.debug("进入twitch")
+
+            self.checkTwitchHealth()
+
             wait = WebDriverWait(self.driver, 30)
             wait.until(ec.presence_of_element_located(
                 (By.CSS_SELECTOR, "button[data-a-target=player-settings-button]"))).click()

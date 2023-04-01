@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from random import randint
 from sys import exit
 from time import sleep
-from traceback import print_exc
+from traceback import format_exc
 
 import requests
 from lxml.html import fromstring
@@ -122,7 +122,7 @@ class Match:
                 f"下一场比赛:  {team1} vs {team2}  在 {league} 赛区 {hour}{ampm} 举行")
         except Exception as e:
             self.log.error(f"获取下一场比赛信息失败 {e}")
-            self.log.error(print_exc())
+            self.log.error(format_exc())
 
     def closeFinishedTabs(self, liveMatches):
         try:
@@ -141,7 +141,7 @@ class Match:
                 self.liveWindows.pop(url, None)
             self.driver.switch_to.window(self.mainWindow)
         except Exception as e:
-            self.log.error(f"关闭窗口出错: {e} \n {print_exc()}")
+            self.log.error(f"关闭窗口出错: {e} \n {format_exc()}")
 
 
     def startWatchNewMatches(self, liveMatches, disWatchMatches):
@@ -166,15 +166,14 @@ class Match:
             self.initLiveStatus()
 
     def SwitchStream(self, url) -> bool:
-
         def clickOptionButton(time=25):
             try:
                 sleep(time)  # wait for switching stream
                 WebDriverWait(self.driver, time).until(ec.element_to_be_clickable(
                     (By.CSS_SELECTOR, "div.options-button"))).click()
             except Exception as e:
-                self.log.error(f"点击stream bution 错误: {e}")
-
+                self.log.error(f"点击stream bution 错误: {e} \n{format_exc()}")
+        
         def closeOptionButton():
             try:
                 self.driver.find_element(
