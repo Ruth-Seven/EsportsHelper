@@ -59,12 +59,18 @@ def main():
 
 
 if __name__ == '__main__':
-    try:
-        main()
-    except (KeyboardInterrupt, InterruptedError):
-        Quit(driver, "程序被打断")
-    except SystemExit:
-        pass
-    except Exception as e:
-        Quit(driver, e)
-    
+    while(1):
+        try:
+            
+            try:
+                main()
+            except (KeyboardInterrupt, InterruptedError):
+                Quit(driver, "程序被打断")
+            except SystemExit:
+                pass
+            except Exception as e:
+                Quit(driver, e)
+        
+        except: 
+            log.info("feat:包括ctrl+c打断, 一切问题都视为网络问题，重启")  
+              
